@@ -200,8 +200,6 @@ result_label = tk.Label(
 )
 result_label.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
 
-
-
 # Styling for buttons
 style = ttk.Style()
 style.configure("Fetch.TButton", font=("Helvetica", 14, "bold"), foreground="#ffffff", background="#f0f0f0")
