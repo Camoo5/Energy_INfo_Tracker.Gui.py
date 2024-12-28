@@ -82,6 +82,7 @@ Choose an option from the dropdown menus to get started!
 
 **Instructions:**
 - **Fetch Data**: Select an option from the dropdown menu and click the "Fetch Data" button to retrieve information.
+- **Exit App**:   Click the last button to "Exit App".
 """
 
 introduction_label = tk.Label(
