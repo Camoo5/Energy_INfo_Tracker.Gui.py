@@ -40,10 +40,10 @@ def fetch_data(url):
         key_paragraphs = [p for p in paragraphs if len(p) > 50 and any(keyword in p.lower() for keyword in ['energy', 'advice', 'bill', 'price', 'usage'])]
 
         # Combine data with readable key paragraphs
-        content = f"Title: {title}\n\nKey Content:\n\n"
-        content += "\n\n".join(key_paragraphs)  # Add extra newline for readability
+        content = f"Title: {title}\n\n"
+        content += "\n\n".join([f"    {p}" for p in key_paragraphs])  # Add indentation and spacing between paragraphs
 
-        return content
+        return content if key_paragraphs else "No relevant content found."
     except requests.exceptions.RequestException as e:
         return f"Error: Unable to fetch data - {e}"
     except Exception as e:
@@ -58,7 +58,13 @@ def display_data(option, category):
             result_text.set(data)
         else:
             result_text.set("Invalid option selected.")
+        # Show the result label after data is set
+        result_label.grid()
     threading.Thread(target=fetch_and_show).start()
+
+# Function to exit the application
+def exit_app():
+    app.quit()
 
 # Create the main application window
 app = tk.Tk()
@@ -66,10 +72,36 @@ app.title("Energy Info Tracker")
 app.geometry("900x700")
 app.configure(bg="#e6f7ff")  # Light blue background
 
+# Welcome and Introduction Label
+introduction_text = """
+Welcome to the Energy Info Tracker App!
+
+The Energy Info Tracker App is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability. It serves as a centralized platform to educate and inform users about various aspects of energy consumption and related environmental and social initiatives.
+
+Choose an option from the dropdown menus to get started!
+
+**Instructions:**
+- **Fetch Data**: Select an option from the dropdown menu and click the "Fetch Data" button to retrieve information.
+"""
+
+introduction_label = tk.Label(
+    app,
+    text=introduction_text,
+    font=("Helvetica", 14),
+    bg="#e6f7ff",
+    fg="#003366",
+    justify="left",
+    wraplength=850,
+    padx=10,
+    pady=10
+)
+introduction_label.pack(pady=10)
+
 # Scrollable frame setup
 main_frame = tk.Frame(app, bg="#e6f7ff")
 main_frame.pack(fill=tk.BOTH, expand=1)
 
+# Create canvas and scrollbar for scrollable frame
 canvas = tk.Canvas(main_frame, bg="#e6f7ff")
 canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
@@ -83,33 +115,6 @@ scrollable_frame.bind(
 
 canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 canvas.configure(yscrollcommand=scrollbar.set)
-
-# Welcome and Introduction Label
-introduction_text = """
-Welcome to the Energy Info Tracker App!
-
-The Energy Info Tracker App is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability. It serves as a centralized platform to educate and inform users about various aspects of energy consumption and related environmental and social initiatives.
-
-Choose an option from the dropdown menus to get started!
-
-**Instructions:**
-- **Fetch Data**: Select an option from the dropdown menu and click the "Fetch Data" button on 
-    the left to retrieve information.   
-- **Back to Menu**: Click the "Back to Menu" button on the right to return to the main menu.
-"""
-
-introduction_label = tk.Label(
-    scrollable_frame,
-    text=introduction_text,
-    font=("Helvetica", 14),
-    bg="#e6f7ff",
-    fg="#003366",
-    justify="left",
-    wraplength=850,
-    padx=10,
-    pady=10
-)
-introduction_label.grid(row=0, column=0, columnspan=2, pady=10)
 
 # Dropdown menu for Information for Consumers
 selected_option1 = tk.StringVar(value="Select an option")
@@ -136,16 +141,7 @@ fetch_button1 = ttk.Button(
     command=lambda: display_data(selected_option1.get(), information_for_consumers),
     style="Fetch.TButton"
 )
-fetch_button1.grid(row=3, column=0, pady=10, padx=5, sticky="w")
-
-# Back button to return to the main menu for Information for Consumers
-back_button_info_consumers = ttk.Button(
-    scrollable_frame, 
-    text="Back to Menu", 
-    command=lambda: show_main_menu(),
-    style="Back.TButton"
-)
-back_button_info_consumers.grid(row=3, column=1, pady=10, padx=5, sticky="e")
+fetch_button1.grid(row=3, column=0, columnspan=2, pady=10, padx=5)
 
 # Dropdown menu for Environmental and Social Schemes
 selected_option2 = tk.StringVar(value="Select an option")
@@ -172,18 +168,9 @@ fetch_button2 = ttk.Button(
     command=lambda: display_data(selected_option2.get(), environmental_schemes),
     style="Fetch.TButton"
 )
-fetch_button2.grid(row=6, column=0, pady=10, padx=5, sticky="w")
+fetch_button2.grid(row=6, column=0, columnspan=2, pady=10, padx=5)
 
-# Back button to return to the main menu for Environmental and Social Schemes
-back_button_env_schemes = ttk.Button(
-    scrollable_frame, 
-    text="Back to Menu", 
-    command=lambda: show_main_menu(),
-    style="Back.TButton"
-)
-back_button_env_schemes.grid(row=6, column=1, pady=10, padx=5, sticky="e")
-
-# Text widget for displaying results
+# Text widget for displaying results (initially hidden)
 result_text = tk.StringVar()
 result_label = tk.Label(
     scrollable_frame,
@@ -198,14 +185,24 @@ result_label = tk.Label(
     borderwidth=2,
     relief="groove"
 )
-result_label.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
+result_label.grid(row=7, column=0, columnspan=2, pady=10)
+result_label.grid_remove()  # Initially hide the label
+
+# Exit App button
+exit_button = ttk.Button(
+    scrollable_frame, 
+    text="Exit App", 
+    command=exit_app,
+    style="Exit.TButton"
+)
+exit_button.grid(row=8, column=0, columnspan=2, pady=20, padx=5)
 
 # Styling for buttons
 style = ttk.Style()
 style.configure("Fetch.TButton", font=("Helvetica", 14, "bold"), foreground="#ffffff", background="#f0f0f0")
 style.map("Fetch.TButton", foreground=[("active", "#007acc")], background=[("active", "#3399ff")])  # Change text color on active
-style.configure("Back.TButton", font=("Helvetica", 14, "bold"), foreground="#ffffff", background="#f0f0f0")
-style.map("Back.TButton", foreground=[("active", "#007acc")], background=[("active", "#3399ff")])  # Change text color on active
+style.configure("Exit.TButton", font=("Helvetica", 14, "bold"), foreground="#ffffff", background="#006400")
+style.map("Exit.TButton", foreground=[("active", "#228B22")], background=[("active", "#228B22")])  # Change background color to dark green on active
 
 # Run the application
 app.mainloop()
