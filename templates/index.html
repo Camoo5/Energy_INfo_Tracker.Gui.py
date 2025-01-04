@@ -11,26 +11,26 @@
     <div class="container">
         <h1>Welcome to the Energy Info Tracker App!</h1>
         <p>
-            The Energy Info Tracker App is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability.
+            The <strong>Energy Info Tracker App</strong> is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability.
         </p>
         <form method="POST" action="{{ url_for('fetch') }}">
             <!-- Category Dropdown -->
             <div class="dropdown">
-                <label for="category" aria-label="Category"><strong>Category:</strong></label>
+                <label for="category" aria-label="Category"><strong>Category:</strong></label><br>
                 <select name="category" id="category" required>
                     <option value="" disabled selected>Select a category</option>
                     <option value="consumers">Information for Consumers</option>
                     <option value="schemes">Environmental and Social Schemes</option>
                 </select>
-            </div>
+            </div><br>
 
             <!-- Option Dropdown -->
             <div class="dropdown">
-                <label for="option" aria-label="Option"><strong>Option:</strong></label>
+                <label for="option" aria-label="Option"><strong>Option:</strong></label><br>
                 <select name="option" id="option" required>
                     <option value="" disabled selected>Select an option</option>
                 </select>
-            </div>
+            </div><br>
 
             <!-- Buttons -->
             <div class="buttons">
@@ -76,7 +76,7 @@
             defaultOption.selected = true;
             optionsDropdown.appendChild(defaultOption);
 
-            for (const [key] of Object.entries(data)) {
+            for (const [key, value] of Object.entries(data)) {
                 const option = document.createElement("option");
                 option.value = key;
                 option.textContent = key;

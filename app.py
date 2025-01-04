@@ -39,15 +39,21 @@ def fetch_data(url):
         paragraphs = [p.get_text(strip=True) for p in soup.find_all('p')]
         key_paragraphs = [p for p in paragraphs if len(p) > 50 and any(keyword in p.lower() for keyword in ['energy', 'advice', 'bill', 'price', 'usage'])]
 
-        # Combine data with readable key paragraphs
-        content = f"Title: {title}\n\nKey Content:\n\n"
-        content += "\n\n".join(key_paragraphs)  # Add extra newline for readability
+        # Combine data with readable key paragraphs, including links and formatting
+        content = f"<strong>Title:</strong> {title}<br><br><strong>Key Content:</strong><br><br>"
+        content += "<br><br>".join(f"<p>{p}</p>" for p in key_paragraphs)  # Add <br><br> for readability
+
+        # Include links for additional navigation
+        content += "<br><strong>Additional Information:</strong><br>"
+        content += "<br>".join(f'<a href="{url}" target="_blank">{name}</a>' for name, url in information_for_consumers.items())
+        content += "<br>"
+        content += "<br>".join(f'<a href="{url}" target="_blank">{name}</a>' for name, url in environmental_schemes.items())
 
         return content
     except requests.exceptions.RequestException as e:
-        return f"Error: Unable to fetch data - {e}"
+        return f"<strong>Error:</strong> Unable to fetch data - {e}"
     except Exception as e:
-        return f"Error: Parsing error - {e}"
+        return f"<strong>Error:</strong> Parsing error - {e}"
 
 @app.route('/')
 def index():
@@ -63,11 +69,18 @@ def fetch():
         url = environmental_schemes.get(option)
     else:
         url = None
-    data = fetch_data(url) if url else "Invalid option selected."
+    data = fetch_data(url) if url else "<strong>Invalid option selected.</strong>"
     return render_template('index.html', data=data, 
                         information_for_consumers=information_for_consumers, 
                         environmental_schemes=environmental_schemes)
 
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return 'Server shutting down...'
 
 if __name__ == '__main__':
     app.run(debug=True)
