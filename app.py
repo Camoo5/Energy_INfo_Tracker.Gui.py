@@ -1,8 +1,14 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import requests
 from bs4 import BeautifulSoup
+from flask_caching import Cache
 
 app = Flask(__name__)
+
+# Configuration for caching
+app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+cache = Cache(app)
 
 # URLs for Information for Consumers
 information_for_consumers = {
@@ -25,9 +31,10 @@ environmental_schemes = {
 }
 
 # Function to fetch and parse data
+@cache.memoize()
 def fetch_data(url):
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -41,13 +48,7 @@ def fetch_data(url):
 
         # Combine data with readable key paragraphs, including links and formatting
         content = f"<strong>Title:</strong> {title}<br><br><strong>Key Content:</strong><br><br>"
-        content += "<br><br>".join(f"<p>{p}</p>" for p in key_paragraphs)  # Add <br><br> for readability
-
-        # Include links for additional navigation
-        content += "<br><strong>Additional Information:</strong><br>"
-        content += "<br>".join(f'<a href="{url}" target="_blank">{name}</a>' for name, url in information_for_consumers.items())
-        content += "<br>"
-        content += "<br>".join(f'<a href="{url}" target="_blank">{name}</a>' for name, url in environmental_schemes.items())
+        content += "<br><br>".join(f"<p>{p}</p>" for p in key_paragraphs)
 
         return content
     except requests.exceptions.RequestException as e:
@@ -57,22 +58,34 @@ def fetch_data(url):
 
 @app.route('/')
 def index():
-    return render_template('index.html', information_for_consumers=information_for_consumers, environmental_schemes=environmental_schemes)
+    return render_template('index.html', 
+    information_for_consumers=information_for_consumers, 
+    environmental_schemes=environmental_schemes)
 
 @app.route('/fetch', methods=['POST'])
 def fetch():
-    category = request.form.get('category')
-    option = request.form.get('option')
-    if category == "consumers":
-        url = information_for_consumers.get(option)
-    elif category == "schemes":
-        url = environmental_schemes.get(option)
-    else:
-        url = None
-    data = fetch_data(url) if url else "<strong>Invalid option selected.</strong>"
-    return render_template('index.html', data=data, 
-                        information_for_consumers=information_for_consumers, 
-                        environmental_schemes=environmental_schemes)
+    try:
+        request_data = request.get_json()  # Parse JSON data
+        if not request_data:
+            return jsonify({"error": "Invalid input. JSON data is required."}), 415
+
+        category = request_data.get('category')
+        option = request_data.get('option')
+
+        if category == "consumers":
+            url = information_for_consumers.get(option)
+        elif category == "schemes":
+            url = environmental_schemes.get(option)
+        else:
+            return jsonify({"error": "Invalid category selected."}), 400
+
+        if url:
+            data = fetch_data(url)
+            return jsonify({"data": data})
+        else:
+            return jsonify({"error": "Invalid option selected."}), 400
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 @app.route('/shutdown', methods=['POST'])
 def shutdown():

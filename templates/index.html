@@ -13,7 +13,7 @@
         <p>
             The <strong>Energy Info Tracker App</strong> is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability.
         </p>
-        <form method="POST" action="{{ url_for('fetch') }}">
+        <form method="POST" action="{{ url_for('fetch') }}" id="energy-form">
             <!-- Category Dropdown -->
             <div class="dropdown">
                 <label for="category" aria-label="Category"><strong>Category:</strong></label><br>
@@ -40,16 +40,18 @@
         </form>
 
         <!-- Result Section -->
-        {% if data %}
-        <div class="result">
-            <h3>Result:</h3>
-            <p>{{ data | safe }}</p>
+        <div id="results">
+            {% if data %}
+            <div class="result">
+                <h3>Result:</h3>
+                <p>{{ data | safe }}</p>
+            </div>
+            {% else %}
+            <div class="result">
+                <p>No data available. Please make a selection and try again.</p>
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="result">
-            <p>No data available. Please make a selection and try again.</p>
-        </div>
-        {% endif %}
 
         <!-- Pass JSON data for JavaScript -->
         <script type="application/json" id="information_for_consumers">{{ information_for_consumers | tojson }}</script>
@@ -58,14 +60,47 @@
 
     <!-- Include the JS file -->
     <script>
-        // Handle dynamic dropdown updates
-        document.getElementById("category").addEventListener("change", function () {
-            const selectedCategory = this.value;
+        const categoryDropdown = document.getElementById("category");
+        const optionDropdown = document.getElementById("option");
+        const resultsContainer = document.getElementById("results");
+
+        function fetchData(category, option) {
+            // Show loading message
+            resultsContainer.innerHTML = "<p>Loading...</p>";
+
+            // Make AJAX request
+            fetch("/fetch", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", // Explicitly set Content-Type
+                },
+                body: JSON.stringify({ category, option }), // Convert data to JSON string
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json(); // Parse JSON response
+                })
+                .then((data) => {
+                    if (data.error) {
+                        resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+                    } else {
+                        resultsContainer.innerHTML = data.data || "<p>No data available.</p>";
+                    }
+                })
+                .catch((error) => {
+                    resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+                });
+        }
+
+        // Update options based on category
+        function updateOptions(category) {
             const optionsDropdown = document.getElementById("option");
             optionsDropdown.innerHTML = ""; // Clear existing options
 
             const data =
-                selectedCategory === "consumers"
+                category === "consumers"
                     ? JSON.parse(document.getElementById("information_for_consumers").textContent)
                     : JSON.parse(document.getElementById("environmental_schemes").textContent);
 
@@ -82,6 +117,14 @@
                 option.textContent = key;
                 optionsDropdown.appendChild(option);
             }
+        }
+
+        // Event listener for category change
+        categoryDropdown.addEventListener("change", () => updateOptions(categoryDropdown.value));
+        optionDropdown.addEventListener("change", () => {
+            const category = categoryDropdown.value;
+            const option = optionDropdown.value;
+            fetchData(category, option);
         });
 
         // Handle Exit App button
@@ -92,6 +135,14 @@
                 alert("Please close the app manually.");
             }
         }
+
+        // Enhance Form Handling
+        document.getElementById('energy-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const category = document.getElementById('category').value;
+            const option = document.getElementById('option').value;
+            fetchData(category, option);
+        });
     </script>
 </body>
 </html>

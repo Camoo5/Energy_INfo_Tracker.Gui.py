@@ -1,23 +1,41 @@
-const consumers = JSON.parse(document.getElementById("information_for_consumers").textContent);
-const schemes = JSON.parse(document.getElementById("environmental_schemes").textContent);
-
 const categoryDropdown = document.getElementById("category");
 const optionDropdown = document.getElementById("option");
+const resultsContainer = document.getElementById("results");
 
-function updateOptions(category) {
-    const options = category === "consumers" ? consumers : schemes;
-    optionDropdown.innerHTML = "";
+function fetchData(category, option) {
+    // Show loading message
+    resultsContainer.innerHTML = "<p>Loading...</p>";
 
-    for (const key in options) {
-        const opt = document.createElement("option");
-        opt.value = key;
-        opt.textContent = key;
-        optionDropdown.appendChild(opt);
-    }
+    // Make AJAX request
+    fetch("/fetch", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json", // Explicitly set Content-Type
+        },
+        body: JSON.stringify({ category, option }), // Convert data to JSON string
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json(); // Parse JSON response
+        })
+        .then((data) => {
+            if (data.error) {
+                resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+            } else {
+                resultsContainer.innerHTML = data.data || "<p>No data available.</p>";
+            }
+        })
+        .catch((error) => {
+            resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+        });
 }
 
-// Initialize options based on default category
-updateOptions(categoryDropdown.value);
-
-// Update options dynamically on category change
+// Event listener for category change
 categoryDropdown.addEventListener("change", () => updateOptions(categoryDropdown.value));
+optionDropdown.addEventListener("change", () => {
+    const category = categoryDropdown.value;
+    const option = optionDropdown.value;
+    fetchData(category, option);
+});
