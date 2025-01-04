@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Info Tracker</title>
+    <!-- Link the CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Energy Info Tracker App!</h1>
+        <p>
+            The Energy Info Tracker App is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability.
+        </p>
+        <form method="POST" action="{{ url_for('fetch') }}">
+            <!-- Category Dropdown -->
+            <div class="dropdown">
+                <label for="category" aria-label="Category"><strong>Category:</strong></label>
+                <select name="category" id="category" required>
+                    <option value="" disabled selected>Select a category</option>
+                    <option value="consumers">Information for Consumers</option>
+                    <option value="schemes">Environmental and Social Schemes</option>
+                </select>
+            </div>
+
+            <!-- Option Dropdown -->
+            <div class="dropdown">
+                <label for="option" aria-label="Option"><strong>Option:</strong></label>
+                <select name="option" id="option" required>
+                    <option value="" disabled selected>Select an option</option>
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="buttons">
+                <button type="submit" aria-label="Fetch Data">Fetch Data</button>
+                <button type="button" class="exit" onclick="exitApp()" aria-label="Exit App">Exit App</button>
+            </div>
+        </form>
+
+        <!-- Result Section -->
+        {% if data %}
+        <div class="result">
+            <h3>Result:</h3>
+            <p>{{ data | safe }}</p>
+        </div>
+        {% else %}
+        <div class="result">
+            <p>No data available. Please make a selection and try again.</p>
+        </div>
+        {% endif %}
+
+        <!-- Pass JSON data for JavaScript -->
+        <script type="application/json" id="information_for_consumers">{{ information_for_consumers | tojson }}</script>
+        <script type="application/json" id="environmental_schemes">{{ environmental_schemes | tojson }}</script>
+    </div>
+
+    <!-- Include the JS file -->
+    <script>
+        // Handle dynamic dropdown updates
+        document.getElementById("category").addEventListener("change", function () {
+            const selectedCategory = this.value;
+            const optionsDropdown = document.getElementById("option");
+            optionsDropdown.innerHTML = ""; // Clear existing options
+
+            const data =
+                selectedCategory === "consumers"
+                    ? JSON.parse(document.getElementById("information_for_consumers").textContent)
+                    : JSON.parse(document.getElementById("environmental_schemes").textContent);
+
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Select an option";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            optionsDropdown.appendChild(defaultOption);
+
+            for (const [key] of Object.entries(data)) {
+                const option = document.createElement("option");
+                option.value = key;
+                option.textContent = key;
+                optionsDropdown.appendChild(option);
+            }
+        });
+
+        // Handle Exit App button
+        function exitApp() {
+            if (window.close) {
+                window.close();
+            } else {
+                alert("Please close the app manually.");
+            }
+        }
+    </script>
+</body>
+</html>
