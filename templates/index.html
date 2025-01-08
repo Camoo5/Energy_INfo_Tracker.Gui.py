@@ -8,11 +8,25 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="spinner hidden">
+    <div class="double-bounce1"></div>
+    <div class="double-bounce2"></div>
+    </div>
+
     <div class="container">
         <h1>Welcome to the Energy Info Tracker App!</h1>
         <p>
-            The <strong>Energy Info Tracker App</strong> is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability.
+       <h3> The <strong>Energy Info Tracker App</strong>is a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability.</h3>
         </p>
+        <p><strong>Key Points Summary:</strong></p>
+        <ul>
+            <li>Average gas and electricity usage is calculated using Typical Domestic Consumption Values (TDCVs).</li>
+            <li>Energy Price Cap and Energy Price Guarantee ensure fair pricing for consumers.</li>
+            <li>The Energy Price Guarantee protects consumers from significant increases in wholesale gas prices.</li>
+            <li>Energy bills are affected by factors like appliance efficiency and usage frequency.</li>
+            <li>Charges by energy suppliers may vary by region.</li>
+        </ul>
         <form method="POST" action="{{ url_for('fetch') }}" id="energy-form">
             <!-- Category Dropdown -->
             <div class="dropdown">
