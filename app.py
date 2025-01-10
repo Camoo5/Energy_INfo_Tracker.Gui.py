@@ -32,9 +32,11 @@ environmental_schemes = {
 
 # Function to fetch and parse data
 @cache.memoize()
+# Function to fetch and parse data
+# Function to fetch and parse data
 def fetch_data(url):
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -44,17 +46,36 @@ def fetch_data(url):
 
         # Extract paragraphs and filter key paragraphs
         paragraphs = [p.get_text(strip=True) for p in soup.find_all('p')]
-        key_paragraphs = [p for p in paragraphs if len(p) > 50 and any(keyword in p.lower() for keyword in ['energy', 'advice', 'bill', 'price', 'usage'])]
+        key_paragraphs = [p for p in paragraphs if len(p) > 50 and any(
+            keyword in p.lower() for keyword in ['energy', 'advice', 'bill', 'price', 'usage', 'environment', 'scheme', 'programme', 'sustainability']
+        )]
 
-        # Combine data with readable key paragraphs, including links and formatting
-        content = f"<strong>Title:</strong> {title}<br><br><strong>Key Content:</strong><br><br>"
-        content += "<br><br>".join(f"<p>{p}</p>" for p in key_paragraphs)
+        # Determine introduction based on content type
+        if any(keyword in url.lower() for keyword in ['environment', 'scheme']):
+            intro_paragraph = (
+                "This section provides an overview of various environmental and social programmes, "
+                "including initiatives like sustainability schemes and energy efficiency programmes, "
+                "to promote a greener and more inclusive energy future."
+            )
+        else:
+            intro_paragraph = (
+                "This section provides insights into energy usage, pricing, and billing details "
+                "to help consumers better understand their energy consumption and costs."
+            )
 
-        return content
+        # Combine title, intro, and key information with each point as a paragraph
+        content = f"<strong>Title:</strong> {title}\n\n"
+        content += f"<p class='intro-paragraph'>{intro_paragraph}</p>\n\n"
+        content += "<div class='section-title'>Key Information:</div>\n"
+        content += "\n".join([f"<p>{p}</p>" for p in key_paragraphs])  # Each key point as a separate paragraph
+
+        return content if key_paragraphs else "No relevant content found."
     except requests.exceptions.RequestException as e:
         return f"<strong>Error:</strong> Unable to fetch data - {e}"
     except Exception as e:
         return f"<strong>Error:</strong> Parsing error - {e}"
+
+
 
 @app.route('/')
 def index():

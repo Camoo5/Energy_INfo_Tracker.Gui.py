@@ -23,7 +23,6 @@ environmental_schemes = {
     "Great British Insulation Scheme": "https://www.ofgem.gov.uk/environmental-and-social-schemes/great-british-insulation-scheme",
     "Warm Home Discount (WHD)": "https://www.ofgem.gov.uk/environmental-and-social-schemes/warm-home-discount-whd",
 }
-
 # Function to fetch and parse data
 def fetch_data(url):
     try:
@@ -39,15 +38,17 @@ def fetch_data(url):
         paragraphs = [p.get_text(strip=True) for p in soup.find_all('p')]
         key_paragraphs = [p for p in paragraphs if len(p) > 50 and any(keyword in p.lower() for keyword in ['energy', 'advice', 'bill', 'price', 'usage'])]
 
-        # Combine data with readable key paragraphs
-        content = f"Title: {title}\n\n"
-        content += "\n\n".join([f"    {p}" for p in key_paragraphs])  # Add indentation and spacing between paragraphs
+        # Combine data into a single block of text without paragraph breaks
+        content = f"Title: {title}\n"
+        content += " ".join(key_paragraphs)  # Combine paragraphs into one block of text
 
         return content if key_paragraphs else "No relevant content found."
     except requests.exceptions.RequestException as e:
         return f"Error: Unable to fetch data - {e}"
     except Exception as e:
         return f"Error: Parsing error - {e}"
+
+
 
 # Function to fetch and display data
 def display_data(option, category):
@@ -173,19 +174,21 @@ fetch_button2.grid(row=6, column=0, columnspan=2, pady=10, padx=5)
 
 # Text widget for displaying results (initially hidden)
 result_text = tk.StringVar()
+
 result_label = tk.Label(
     scrollable_frame,
     textvariable=result_text,
-    wraplength=850,
-    justify="left",
-    font=("Helvetica", 14),  # Larger font size
-    bg="#ffffff",  # White background for text
-    fg="#333333",  # Dark gray text color
+    wraplength=850,  # Remove this or set a large value to prevent line wrapping
+    justify="left",  # Keep text aligned to the left
+    font=("Helvetica", 14),
+    bg="#ffffff",
+    fg="#333333",
     padx=10,
     pady=10,
     borderwidth=2,
     relief="groove"
 )
+
 result_label.grid(row=7, column=0, columnspan=2, pady=10)
 result_label.grid_remove()  # Initially hide the label
 
