@@ -1,9 +1,6 @@
 # Energy Info Tracker App
 
 The **Energy Info Tracker App** is  a user-friendly tool designed to empower energy consumers by providing easy access to critical information about energy usage, pricing, and sustainability. It serves as a centralized platform to educate and inform users about various aspects of energy consumption and related environmental and social initiatives.
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](image-2.png)
 
 ## Key Features
 
@@ -38,6 +35,11 @@ The **Energy Info Tracker App** is  a user-friendly tool designed to empower ene
 - Encourages eco-friendly practices and participation in environmental initiatives.
 
 The **Energy Info Tracker App** bridges the gap between consumers and the often-complex world of energy, helping users save money while contributing to a more sustainable and socially conscious energy future.
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
 
 ---
 
