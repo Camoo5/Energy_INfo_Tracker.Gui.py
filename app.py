@@ -3,7 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 from flask_caching import Cache
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=r'C:\Users\oluwo\OneDrive\Desktop\Energy_Info_Tracker\templates')
+
 
 # Configuration for caching
 app.config['CACHE_TYPE'] = 'SimpleCache'
@@ -32,8 +33,6 @@ environmental_schemes = {
 
 # Function to fetch and parse data
 @cache.memoize()
-# Function to fetch and parse data
-# Function to fetch and parse data
 def fetch_data(url):
     try:
         response = requests.get(url)
@@ -75,11 +74,9 @@ def fetch_data(url):
     except Exception as e:
         return f"<strong>Error:</strong> Parsing error - {e}"
 
-
-
 @app.route('/')
 def index():
-    return render_template('index.html', 
+    return render_template('index.html',
     information_for_consumers=information_for_consumers, 
     environmental_schemes=environmental_schemes)
 
