@@ -1,4 +1,4 @@
-https://dashboard.render.com/web/srv-cueksvtumphs73adc8kg/deploys/dep-cuekt05umphs73adc8s0from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify
 import requests
 from bs4 import BeautifulSoup
 from flask_caching import Cache
