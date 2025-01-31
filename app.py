@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request, jsonify
 
-app = Flask(__name__, template_folder=r'C:/Users/oluwo/OneDrive/Desktop/Energy_Info_Tracker/new_venv/')
+app = Flask(__name__)
 
 
 
