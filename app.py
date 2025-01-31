@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import requests
 from bs4 import BeautifulSoup
-from flask_caching import Cache
+from flask import Flask, render_template, request, jsonify
 
-app = Flask(__name__, template_folder=r'C:\Users\oluwo\OneDrive\Desktop\Energy_Info_Tracker\templates')
+app = Flask(__name__, template_folder=r'C:/Users/oluwo/OneDrive/Desktop/Energy_Info_Tracker/new_venv/')
+
 
 
 # Configuration for caching
