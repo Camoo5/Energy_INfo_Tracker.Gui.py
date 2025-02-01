@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, jsonify
+from flask_caching import Cache
+
 import requests
 from bs4 import BeautifulSoup
 
